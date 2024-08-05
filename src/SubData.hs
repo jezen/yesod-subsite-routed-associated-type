@@ -10,7 +10,7 @@
 {-# LANGUAGE RankNTypes #-}
 {-# LANGUAGE StandaloneDeriving #-}
 {-# LANGUAGE TemplateHaskell #-}
-{-# LANGUAGE TypeFamilyDependencies #-}
+{-# LANGUAGE TypeFamilies #-}
 {-# LANGUAGE UndecidableInstances #-}
 {-# LANGUAGE ViewPatterns #-}
 
@@ -25,8 +25,11 @@ mkYesodSubData "(YesodSubApp master) => SubApp master" [parseRoutes|
 !/#{Key (Thing master)} ThingR GET
 |]
 
-class (PersistEntity (Thing master), PathPiece (Key (Thing master))) => YesodSubApp master where
-  type Thing master = t | t -> master
+class ( PersistEntity (Thing master)
+      , PathPiece (Key (Thing master))
+      ) => YesodSubApp master where
+
+  type Thing master
 
 newSubApp :: MonadIO m => m (SubApp site)
 newSubApp = pure SubApp
