@@ -16,3 +16,8 @@ spec = withApp $ do
     get $ SubR HelloR
     statusIs 200
     htmlAllContain "p" "Hello, world!"
+
+  it "Loads the subsite's thing page" $ do
+    get $ SubR $ ThingR 3
+    statusIs 200
+    htmlAllContain "p" "3"

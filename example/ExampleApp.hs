@@ -20,15 +20,15 @@ import SubApp
 
 data App = App
   { appHttpManager :: Manager
-  , appSubApp :: SubApp
+  , appSubApp      :: SubApp (Thing App)
   }
 
 mkYesod "App" [parseRoutes|
 / HomeR GET
-/sub SubR SubApp appSubApp
+/sub SubR {SubApp (Thing App)} appSubApp
 |]
 
-getHomeR :: Handler Html
+getHomeR :: HandlerFor App Html
 getHomeR = defaultLayout [whamlet|<p>Home|]
 
 instance Yesod App where
@@ -45,7 +45,8 @@ instance Yesod App where
           ^{pageBody p}
     |]
 
-instance YesodSubApp App
+instance YesodSubApp App where
+  type instance Thing App = Int
 
 instance RenderMessage App FormMessage where
   renderMessage _ _ = defaultFormMessage

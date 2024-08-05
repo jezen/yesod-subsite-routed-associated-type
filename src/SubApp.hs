@@ -6,6 +6,8 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE QuasiQuotes #-}
 {-# LANGUAGE TemplateHaskell #-}
+{-# LANGUAGE TypeFamilies #-}
+{-# LANGUAGE TypeOperators #-}
 {-# LANGUAGE ViewPatterns #-}
 
 module SubApp
@@ -16,8 +18,11 @@ module SubApp
 import ClassyPrelude.Yesod
 import SubData
 
-instance YesodSubApp m => YesodSubDispatch SubApp m where
+instance (YesodSubApp master, authId ~ Thing master) => YesodSubDispatch (SubApp authId) master where
   yesodSubDispatch = $(mkYesodSubDispatch resourcesSubApp)
 
-getHelloR :: YesodSubApp m => SubHandlerFor SubApp m Html
+getHelloR :: Yesod master => SubHandlerFor (SubApp (Thing master)) master Html
 getHelloR = liftHandler $ defaultLayout [whamlet|<p>Hello, world!|]
+
+getThingR :: Yesod master => Show authId => authId -> SubHandlerFor (SubApp authId) master Html
+getThingR thingId = liftHandler $ defaultLayout [whamlet|<p>#{tshow thingId}|]

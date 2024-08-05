@@ -1,3 +1,4 @@
+{-# LANGUAGE ConstraintKinds #-}
 {-# LANGUAGE DefaultSignatures #-}
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE FlexibleInstances #-}
@@ -7,8 +8,9 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE QuasiQuotes #-}
 {-# LANGUAGE RankNTypes #-}
+{-# LANGUAGE StandaloneDeriving #-}
 {-# LANGUAGE TemplateHaskell #-}
-{-# LANGUAGE TypeFamilies #-}
+{-# LANGUAGE TypeFamilyDependencies #-}
 {-# LANGUAGE UndecidableInstances #-}
 {-# LANGUAGE ViewPatterns #-}
 
@@ -16,16 +18,22 @@ module SubData where
 
 import ClassyPrelude.Yesod
 
-data SubApp = SubApp
+data SubApp authId = SubApp
 
-mkYesodSubData "SubApp" [parseRoutes|
+type MyConstraints a =
+  ( Eq a
+  , Show a
+  , Read a
+  , PathPiece a
+  )
+
+mkYesodSubData "(MyConstraints authId) => SubApp authId" [parseRoutes|
 /hello HelloR GET
+!/#{authId} ThingR GET
 |]
 
-type Form a = forall m. YesodSubApp m =>
-  Html -> MForm (SubHandlerFor SubApp m) (FormResult a, WidgetFor m ())
+class (Yesod master, MyConstraints (Thing master)) => YesodSubApp master where
+  type Thing master
 
-class (Yesod m, RenderMessage m FormMessage) => YesodSubApp m
-
-newSubApp :: MonadIO m => m SubApp
+newSubApp :: MonadIO m => m (SubApp site)
 newSubApp = pure SubApp
