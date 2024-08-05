@@ -17,11 +17,12 @@
 module ExampleApp where
 
 import ClassyPrelude.Yesod
-import SubApp qualified as Sub
+import SubApp hiding (Thing)
+import SubApp qualified
 
 data App = App
   { appHttpManager :: Manager
-  , appSubApp      :: Sub.SubApp App
+  , appSubApp      :: SubApp App
   }
 
 share [mkPersist sqlSettings, mkMigrate "migrateAll"] [persistLowerCase|
@@ -32,7 +33,7 @@ Thing sql=things
 
 mkYesod "App" [parseRoutes|
 / HomeR GET
-/sub SubR {Sub.SubApp App} appSubApp
+/sub SubR {SubApp App} appSubApp
 |]
 
 getHomeR :: HandlerFor App Html
@@ -52,7 +53,7 @@ instance Yesod App where
           ^{pageBody p}
     |]
 
-instance Sub.YesodSubApp App where
+instance YesodSubApp App where
   type Thing App = ExampleApp.Thing
 
 instance RenderMessage App FormMessage where
@@ -62,7 +63,7 @@ instance HasHttpManager App where
   getHttpManager = appHttpManager
 
 makeFoundation :: IO App
-makeFoundation = App <$> newManager <*> liftIO Sub.newSubApp
+makeFoundation = App <$> newManager <*> liftIO newSubApp
 
 makeApplication :: App -> IO Application
 makeApplication foundation = do
