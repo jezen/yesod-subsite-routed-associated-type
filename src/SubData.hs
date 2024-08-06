@@ -10,7 +10,7 @@
 {-# LANGUAGE RankNTypes #-}
 {-# LANGUAGE StandaloneDeriving #-}
 {-# LANGUAGE TemplateHaskell #-}
-{-# LANGUAGE TypeFamilyDependencies #-}
+{-# LANGUAGE TypeFamilies #-}
 {-# LANGUAGE UndecidableInstances #-}
 {-# LANGUAGE ViewPatterns #-}
 
@@ -18,21 +18,17 @@ module SubData where
 
 import ClassyPrelude.Yesod
 
-data SubApp authId = SubApp
+data SubApp master = SubApp
 
-type MyConstraints a =
-  ( Eq a
-  , Show a
-  , Read a
-  , PathPiece a
-  )
-
-mkYesodSubData "(MyConstraints authId) => SubApp authId" [parseRoutes|
+mkYesodSubData "(YesodSubApp master) => SubApp master" [parseRoutes|
 /hello HelloR GET
-!/#{authId} ThingR GET
+!/#{Key (Thing master)} ThingR GET
 |]
 
-class (Yesod master, MyConstraints (Thing master)) => YesodSubApp master where
+class ( PersistEntity (Thing master)
+      , PathPiece (Key (Thing master))
+      ) => YesodSubApp master where
+
   type Thing master
 
 newSubApp :: MonadIO m => m (SubApp site)

@@ -66,6 +66,7 @@ test-suite test
     , fakedata                         >=1.0
     , fast-logger
     , hspec                            >=2.7.10
+    , persistent
     , yesod-subsite
     , yesod-subsite-example
     , yesod

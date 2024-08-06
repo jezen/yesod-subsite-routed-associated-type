@@ -11,21 +11,29 @@
 {-# LANGUAGE StandaloneDeriving #-}
 {-# LANGUAGE TemplateHaskell #-}
 {-# LANGUAGE TypeFamilies #-}
+{-# LANGUAGE TypeOperators #-}
 {-# LANGUAGE UndecidableInstances #-}
 
 module ExampleApp where
 
 import ClassyPrelude.Yesod
-import SubApp
+import SubApp hiding (Thing)
+import SubApp qualified
 
 data App = App
   { appHttpManager :: Manager
-  , appSubApp      :: SubApp (Thing App)
+  , appSubApp      :: SubApp App
   }
+
+share [mkPersist sqlSettings, mkMigrate "migrateAll"] [persistLowerCase|
+Thing sql=things
+  foo Text
+  bar Text
+|]
 
 mkYesod "App" [parseRoutes|
 / HomeR GET
-/sub SubR {SubApp (Thing App)} appSubApp
+/sub SubR {SubApp App} appSubApp
 |]
 
 getHomeR :: HandlerFor App Html
@@ -46,7 +54,7 @@ instance Yesod App where
     |]
 
 instance YesodSubApp App where
-  type instance Thing App = Int
+  type Thing App = ExampleApp.Thing
 
 instance RenderMessage App FormMessage where
   renderMessage _ _ = defaultFormMessage

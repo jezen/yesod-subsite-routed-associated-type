@@ -6,7 +6,7 @@ module TestImport
 import ClassyPrelude as X hiding (Handler, delete, deleteBy, exp)
 import ExampleApp as X
 import Faker as X
-import SubApp as X
+import SubApp as X hiding (Thing)
 import System.Log.FastLogger.LoggerSet (newStdoutLoggerSet)
 import Test.Hspec as X
 import Yesod.Core.Dispatch (defaultMiddlewaresNoLogging)

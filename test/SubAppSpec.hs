@@ -2,6 +2,7 @@
 
 module SubAppSpec where
 
+import Database.Persist.Sql (toSqlKey)
 import TestImport
 
 spec :: Spec
@@ -18,6 +19,6 @@ spec = withApp $ do
     htmlAllContain "p" "Hello, world!"
 
   it "Loads the subsite's thing page" $ do
-    get $ SubR $ ThingR 3
+    get $ SubR $ ThingR $ toSqlKey 3
     statusIs 200
     htmlAllContain "p" "3"
